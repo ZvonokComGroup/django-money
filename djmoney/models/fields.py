@@ -273,7 +273,9 @@ class MoneyField(models.DecimalField):
             return super(MoneyField, self).get_default()
 
     def formfield(self, **kwargs):
-        defaults = {"form_class": forms.MoneyField, "decimal_places": DECIMAL_PLACES}
+        #defaults = {"form_class": forms.MoneyField, "decimal_places": DECIMAL_PLACES}
+        # ZVN-691
+        defaults = {"form_class": forms.MoneyField}
         defaults.update(kwargs)
         defaults["currency_choices"] = self.currency_choices
         defaults["default_currency"] = self.default_currency
