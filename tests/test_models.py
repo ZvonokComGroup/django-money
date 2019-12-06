@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on May 7, 2011
 
@@ -12,7 +11,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.migrations.writer import MigrationWriter
 from django.db.models import Case, F, Func, Q, Value, When
-from django.utils.six import PY2
 from django.utils.translation import override
 
 import pytest
@@ -591,10 +589,7 @@ def test_different_hashes():
 
 
 def test_migration_serialization():
-    if PY2:
-        serialized = "djmoney.money.Money(100, b'GBP')"
-    else:
-        serialized = "djmoney.money.Money(100, 'GBP')"
+    serialized = "djmoney.money.Money(100, 'GBP')"
     assert MigrationWriter.serialize(Money(100, "GBP")) == (serialized, {"import djmoney.money"})
 
 
@@ -702,3 +697,15 @@ class TestSharedCurrency:
         instance = ModelWithSharedCurrency.objects.create(first=value, second=value)
         assert instance.first == value
         assert instance.second == value
+
+
+def test_order_by():
+    def extract_data(instance):
+        return instance.money, instance.integer
+
+    ModelWithVanillaMoneyField.objects.create(money=Money(10, "AUD"), integer=2)
+    ModelWithVanillaMoneyField.objects.create(money=Money(10, "AUD"), integer=1)
+    ModelWithVanillaMoneyField.objects.create(money=Money(10, "USD"), integer=3)
+
+    qs = ModelWithVanillaMoneyField.objects.order_by("integer").filter(money=Money(10, "AUD"))
+    assert list(map(extract_data, qs)) == [(Money(10, "AUD"), 1), (Money(10, "AUD"), 2)]

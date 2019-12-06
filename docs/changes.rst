@@ -3,20 +3,39 @@
 Changelog
 =========
 
-`1.0`_ - TBA
-------------
+`1.0`_ - 2019-11-08
+-------------------
 
 Added
 ~~~~~
 
 - Support for money descriptor customization. (`Stranger6667`_)
+- Fix ``order_by()`` not returning money-compatible queryset `#519`_ (`lieryan`_)
+- Django 3.0 support
 
 Removed
 ~~~~~~~
 
 - Support for Django 1.8 & 2.0. (`Stranger6667`_)
+- Support for Python 2.7. `#515`_ (`benjaoming`_)
 - Support for Python 3.4. (`Stranger6667`_)
 - ``MoneyPatched``, use ``djmoney.money.Money`` instead. (`Stranger6667`_)
+
+Fixed
+~~~~~
+
+- Support instances with ``decimal_places=0`` `#509`_ (`fara`_)
+
+
+`0.15.1`_ - 2019-06-22
+----------------------
+
+Fixed
+~~~~~
+
+- Respect field ``decimal_places`` when instantiating ``Money`` object from field db values. `#501`_ (`astutejoe`_)
+- Restored linting in CI tests (`benjaoming`_)
+
 
 `0.15`_ - 2019-05-30
 --------------------
@@ -607,7 +626,8 @@ Added
 
 - Initial public release
 
-.. _1.0.dev: https://github.com/django-money/django-money/compare/0.15...HEAD
+.. _1.0: https://github.com/django-money/django-money/compare/0.15.1...HEAD
+.. _0.15.1: https://github.com/django-money/django-money/compare/0.15.1...0.15
 .. _0.15: https://github.com/django-money/django-money/compare/0.15...0.14.4
 .. _0.14.4: https://github.com/django-money/django-money/compare/0.14.4...0.14.3
 .. _0.14.3: https://github.com/django-money/django-money/compare/0.14.3...0.14.2
@@ -656,6 +676,8 @@ Added
 .. _0.3: https://github.com/django-money/django-money/compare/0.2...0.3
 .. _0.2: https://github.com/django-money/django-money/compare/0.2...a6d90348085332a393abb40b86b5dd9505489b04
 
+.. _#515: https://github.com/django-money/django-money/issues/515
+.. _#509: https://github.com/django-money/django-money/issues/509
 .. _#490: https://github.com/django-money/django-money/issues/490
 .. _#475: https://github.com/django-money/django-money/issues/475
 .. _#480: https://github.com/django-money/django-money/issues/480
@@ -744,6 +766,7 @@ Added
 .. _#80: https://github.com/django-money/django-money/issues/80
 .. _#418: https://github.com/django-money/django-money/issues/418
 .. _#411: https://github.com/django-money/django-money/issues/411
+.. _#519: https://github.com/django-money/django-money/issues/519
 
 .. _77cc33: https://github.com/77cc33
 .. _AlexRiina: https://github.com/AlexRiina
@@ -758,6 +781,7 @@ Added
 .. _alexhayes: https://github.com/alexhayes
 .. _andytwoods: https://github.com/andytwoods
 .. _arthurk: https://github.com/arthurk
+.. _astutejoe: https://github.com/astutejoe
 .. _benjaoming: https://github.com/benjaoming
 .. _briankung: https://github.com/briankung
 .. _browniebroke: https://github.com/browniebroke
@@ -787,6 +811,7 @@ Added
 .. _ivirabyan: https://github.com/ivirabyan
 .. _k8n: https://github.com/k8n
 .. _lmdsp: https://github.com/lmdsp
+.. _lieryan: https://github.com/lieryan
 .. _lobziik: https://github.com/lobziik
 .. _mattions: https://github.com/mattions
 .. _mithrilstar: https://github.com/mithrilstar
@@ -812,3 +837,4 @@ Added
 .. _1337: https://github.com/1337
 .. _humrochagf: https://github.com/humrochagf
 .. _washeck: https://github.com/washeck
+.. _fara: https://github.com/fara
