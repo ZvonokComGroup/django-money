@@ -25,9 +25,9 @@ http://code.google.com/p/python-money/
 
 This version adds tests, and comes with several critical bugfixes.
 
-Django versions supported: 1.8, 1.11, 2.0, 2.1, 2.2
+Django versions supported: 1.11, 2.1, 2.2
 
-Python versions supported: 2.7, 3.4, 3.5, 3.6, 3.7
+Python versions supported: 2.7, 3.5, 3.6, 3.7
 
 PyPy versions supported: PyPy 2.6, PyPy3 2.4
 
@@ -482,3 +482,24 @@ To achieve the same behaviour as above you would include both field names:
         class Meta:
             model = Expenses
             fields = ('id', 'amount', 'amount_currency')
+
+Customization
+-------------
+
+If there is a need to customize the process deconstructing ``Money`` instances onto Django Fields and the other way around,
+then it is possible to use a custom descriptor like this one:
+
+.. code:: python
+
+    class MyMoneyDescriptor:
+
+        def __get__(self, obj, type=None):
+            amount = obj.__dict__[self.field.name]
+            return Money(amount, "EUR")
+
+It will always use ``EUR`` for all ``Money`` instances when ``obj.money`` is called. Then it should be passed to ``MoneyField``:
+
+.. code:: python
+
+    class Expenses(models.Model):
+        amount = MoneyField(max_digits=10, decimal_places=2, money_descriptor_class=MyMoneyDescriptor)

@@ -2,10 +2,9 @@
 from __future__ import division
 
 from decimal import Decimal
-from warnings import warn
 
-from django import VERSION
 from django.core.exceptions import ValidationError
+from django.core.validators import DecimalValidator
 from django.db import models
 from django.db.models import F, Field, Func, Value
 from django.db.models.expressions import BaseExpression
@@ -16,12 +15,17 @@ from djmoney import forms
 from djmoney.money import Currency, Money
 from moneyed import Money as OldMoney
 
-from .._compat import MoneyValidator, setup_managers, smart_unicode, string_types
+from .._compat import setup_managers, smart_unicode, string_types
 from ..settings import CURRENCY_CHOICES, DECIMAL_PLACES, DEFAULT_CURRENCY
 from ..utils import MONEY_CLASSES, get_currency_field_name, prepare_expression
 
 
 __all__ = ("MoneyField",)
+
+
+class MoneyValidator(DecimalValidator):
+    def __call__(self, value):
+        return super(MoneyValidator, self).__call__(value.amount)
 
 
 def get_value(obj, expr):
@@ -89,7 +93,7 @@ class MoneyFieldProxy(object):
         currency = obj.__dict__[self.currency_field_name]
         if amount is None:
             return None
-        return Money(amount=amount, currency=currency)
+        return Money(amount=amount, currency=currency, decimal_places=self.field.decimal_places)
 
     def __get__(self, obj, type=None):
         if obj is None:
@@ -170,6 +174,7 @@ class MoneyField(models.DecimalField):
         currency_choices=CURRENCY_CHOICES,
         currency_max_length=3,
         currency_field_name=None,
+        money_descriptor_class=MoneyFieldProxy,
         **kwargs
     ):
         nullable = kwargs.get("null", False)
@@ -181,6 +186,7 @@ class MoneyField(models.DecimalField):
         self.default_currency = default_currency
         self.currency_choices = currency_choices
         self.currency_field_name = currency_field_name
+        self.money_descriptor_class = money_descriptor_class
 
         super(MoneyField, self).__init__(verbose_name, name, max_digits, decimal_places, default=default, **kwargs)
         self.creation_counter += 1
@@ -225,14 +231,12 @@ class MoneyField(models.DecimalField):
         self.run_validators(value)
         return output
 
-    if VERSION[:2] > (1, 8):
-
-        @cached_property
-        def validators(self):
-            """
-            Default ``DecimalValidator`` doesn't work with ``Money`` instances.
-            """
-            return super(models.DecimalField, self).validators + [MoneyValidator(self.max_digits, self.decimal_places)]
+    @cached_property
+    def validators(self):
+        """
+        Default ``DecimalValidator`` doesn't work with ``Money`` instances.
+        """
+        return super(models.DecimalField, self).validators + [MoneyValidator(self.max_digits, self.decimal_places)]
 
     def contribute_to_class(self, cls, name):
         cls._meta.has_money_field = True
@@ -242,7 +246,7 @@ class MoneyField(models.DecimalField):
 
         super(MoneyField, self).contribute_to_class(cls, name)
 
-        setattr(cls, self.name, MoneyFieldProxy(self))
+        setattr(cls, self.name, self.money_descriptor_class(self))
 
     def add_currency_field(self, cls, name):
         """
@@ -284,10 +288,7 @@ class MoneyField(models.DecimalField):
         return super(MoneyField, self).formfield(**defaults)
 
     def value_to_string(self, obj):
-        if VERSION[:2] == (1, 8):
-            value = self._get_val_from_obj(obj)
-        else:
-            value = self.value_from_object(obj)
+        value = self.value_from_object(obj)
         return self.get_prep_value(value)
 
     def deconstruct(self):
@@ -320,12 +321,3 @@ def patch_managers(sender, **kwargs):
 
 
 class_prepared.connect(patch_managers)
-
-
-class MoneyPatched(Money):
-    def __init__(self, *args, **kwargs):
-        warn(
-            "'djmoney.models.fields.MoneyPatched' is deprecated. Use 'djmoney.money.Money' instead",
-            PendingDeprecationWarning,
-        )
-        super(MoneyPatched, self).__init__(*args, **kwargs)
