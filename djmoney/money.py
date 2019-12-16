@@ -55,7 +55,7 @@ class Money(DefaultMoney):
         return self.use_l10n
 
     def __str__(self):
-        kwargs = {"money": self, "decimal_places": self.decimal_places}
+        kwargs = {"money": self, "decimal_places": DECIMAL_PLACES}  # ZVN-691
         if self.is_localized:
             locale = get_current_locale()
             if locale:
