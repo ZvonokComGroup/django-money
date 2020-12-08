@@ -1,8 +1,8 @@
 django-money
 ============
 
-.. image:: https://travis-ci.org/django-money/django-money.svg?branch=master
-   :target: https://travis-ci.org/django-money/django-money
+.. image:: https://github.com/django-money/django-money/workflows/CI/badge.svg
+   :target: https://github.com/django-money/django-money/actions
    :alt: Build Status
 
 .. image:: http://codecov.io/github/django-money/django-money/coverage.svg?branch=master
@@ -20,8 +20,8 @@ django-money
 A little Django app that uses ``py-moneyed`` to add support for Money
 fields in your models and forms.
 
-* Django versions supported: 1.11, 2.1, 2.2, 3.0
-* Python versions supported: 3.5, 3.6, 3.7
+* Django versions supported: 1.11, 2.1, 2.2, 3.0, 3.1
+* Python versions supported: 3.5, 3.6, 3.7, 3.8, 3.9
 * PyPy versions supported: PyPy3
 
 If you need support for older versions of Django and Python, please refer to older releases mentioned in `the release notes <https://django-money.readthedocs.io/en/latest/changes.html>`__.
@@ -42,7 +42,7 @@ Using `pip`:
 
    $ pip install django-money
 
-This automatically installs ``py-moneyed`` v0.7 (or later).
+This automatically installs ``py-moneyed`` v0.8 (or later).
 
 Add ``djmoney`` to your ``INSTALLED_APPS``. This is required so that money field are displayed correctly in the admin.
 
@@ -441,8 +441,20 @@ conversions happening in different directions.
 Usage with Django REST Framework
 --------------------------------
 
-Make sure that ``djmoney`` is in the ``INSTALLED_APPS`` of your ``settings.py`` and MoneyFields to automatically
-work with Django REST Framework.
+Make sure that ``djmoney`` and is in the ``INSTALLED_APPS`` of your
+``settings.py`` and that ``rest_framework`` has been installed. MoneyField will
+automatically register a serializer for Django REST Framework through
+``djmoney.apps.MoneyConfig.ready()``.
+
+You can add a serializable field the following way:
+
+.. code:: python
+
+    from djmoney.contrib.django_rest_framework import MoneyField
+
+    class Serializers(serializers.Serializer):
+        my_computed_prop = MoneyField(max_digits=10, decimal_places=2)
+
 
 Built-in serializer works in the following way:
 
