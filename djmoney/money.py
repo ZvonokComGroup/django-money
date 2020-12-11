@@ -34,6 +34,8 @@ class Money(DefaultMoney):
     def __add__(self, other):
         if isinstance(other, F):
             return other.__radd__(self)
+        if not isinstance(other, (Money, DefaultMoney)):
+            return Money(self.amount + other, self.currency)
         other = maybe_convert(other, self.currency)
         result = super().__add__(other)
         result.decimal_places = self._fix_decimal_places(other)
@@ -42,6 +44,8 @@ class Money(DefaultMoney):
     def __sub__(self, other):
         if isinstance(other, F):
             return other.__rsub__(self)
+        if not isinstance(other, Money):
+            return Money(self.amount - other, self.currency)
         other = maybe_convert(other, self.currency)
         result = super().__sub__(other)
         result.decimal_places = self._fix_decimal_places(other)
