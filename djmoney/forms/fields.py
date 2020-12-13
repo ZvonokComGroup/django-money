@@ -35,7 +35,7 @@ class MoneyField(MultiValueField):
             **kwargs
         )
         currency_field = ChoiceField(choices=currency_choices)
-        currency_field.widget.attrs['disabled'] = len(currency_choices) == 1
+        currency_field.widget.attrs['readonly'] = len(currency_choices) == 1
 
         self.widget = MoneyWidget(
             amount_widget=amount_field.widget,
